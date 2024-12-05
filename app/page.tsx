@@ -6,6 +6,7 @@ import {
   ReadonlyWalletAccount,
   type Wallet,
 } from "@mysten/wallet-standard";
+import { verifyPersonalMessageSignature } from "@mysten/sui/verify";
 
 function findHanaWallet(wallets: readonly Wallet[]) {
   return (wallets.find((aWallet) => aWallet.name.includes("Hana Wallet")) ||
@@ -15,6 +16,7 @@ function App() {
   const [suiWallet, setSuiWallet] = useState<Wallet | null>(null);
   const [accounts, setAccounts] = useState<ReadonlyWalletAccount[]>([]);
   const [signature, setSignature] = useState<any | null>(null);
+  const [recoveredAddress, setRecoveredAddress] = useState<any | null>(null);
 
   async function onButton1Click() {
     try {
@@ -51,6 +53,16 @@ function App() {
       console.log("Signature");
       console.log(signature1);
       setSignature(signature1);
+
+      const pubKey = await verifyPersonalMessageSignature(
+        bar,
+        signature1.signature,
+      );
+      console.log("PubKey");
+      console.log(pubKey);
+      console.log(pubKey.toSuiAddress());
+
+      setRecoveredAddress(pubKey.toSuiAddress());
     } catch (err) {
       console.log("Error clicking button 2");
       console.log(err);
@@ -118,6 +130,12 @@ function App() {
                 <div>No signature</div>
               ) : (
                 <div>{JSON.stringify(signature)}</div>
+              )}
+              <div className="text-sm">Recovered Address:</div>
+              {recoveredAddress == null ? (
+                <div>null</div>
+              ) : (
+                <div>{recoveredAddress}</div>
               )}
             </div>
           </aside>
